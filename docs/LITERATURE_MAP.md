@@ -54,7 +54,42 @@ They are provenance records, not independent experimental validation:
   formulation.
 - [`Steal Me.pdf`](../Steal%20Me.pdf): VOPU architectural specification
   (document ID SPEC-VOPU-2026-REV6), whose file metadata records creation on
-  17 September 2026.
+  17 September 2026. It defines the compiled latent-graph workflow, inverse
+  shrinkage compensation, frozen volumetric weight mapping, terminal-node GEMM
+  zones, passive epsilon-thresholding, lambda-decay temporal context, and
+  dynamic Q/K cross-phase interaction.
+
+## VOPU architectural specification
+
+**Source:** [`Steal Me.pdf`](../Steal%20Me.pdf), SPEC-VOPU-2026-REV6  
+**Research track:** Volumetric optical computing; photonic neural networks;
+fabrication systems.
+
+**Core proposal:** Compile transformer state-dictionary weights (`Wq`, `Wk`,
+`Wv`, and feed-forward weights) into a 3D waveguide topology, terminal-node
+map, and refractive-index/material landscape. A monolithic single-mode optical
+bus routes phase- and amplitude-encoded fields to deterministic terminal
+scattering, reflection, and phase elements.
+
+**State mechanisms:** Reverse-saturable-absorber zones implement proposed
+epsilon-thresholding; excited-state relaxation provides proposed lambda-decay
+temporal context; and Q/K cross-phase modulation provides a proposed dynamic
+operand interaction.
+
+**Fabrication workflow:** Two-photon scribing in a swollen polyacrylate
+hydrogel, terminal-node functionalization, ionic dehydration and isotropic
+shrinkage, supercritical CO2 drying, aligned packaging, and homodyne readout.
+The specification explicitly calls for inverse-shrinkage compensation before
+writing.
+
+**Economic model:** The document gives a provisional marginal core estimate of
+approximately $23.93, including hydrogel, precursors, chromophores,
+photoinitiators/solvents, writing, and drying. This is a model input, not a
+measured production cost.
+
+**Evidence label:** H for the complete VOPU architecture and its nonlinear
+mechanisms; D for the document's own specification; D/S for the separate
+ImpCarv fabrication results on which the proposed substrate is based.
 
 ## Reference-entry template
 

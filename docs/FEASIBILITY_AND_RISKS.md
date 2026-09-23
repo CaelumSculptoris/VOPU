@@ -4,12 +4,13 @@
 
 | Claim | Type | Evidence needed | Status |
 |---|---|---|---|
+| Transformer weights can be compiled into a 3D optical topology and material/index map | H/S | Compiler prototype, inverse-shrinkage model, and design-to-measurement comparison | Open |
 | ImpCarv can create sub-100 nm post-shrinkage features | D | Yang et al., *Nature Photonics* (2026), reporting 67 ± 12 nm lateral and 22 ± 2 nm axial features; independent reproduction and VOPU-specific transfer remain open | Source demonstrated; reproduction open |
 | 3D channels can remain single-mode after shrinkage | H | Mode simulation plus near/far-field measurement | Open |
-| Terminal nodes can realize useful complex weights | H | Transfer-matrix calibration across devices | Open |
-| RSA can provide a stable optical threshold | H | Transmission, hysteresis, recovery, and damage tests | Open |
-| Lifetime engineering can provide useful temporal memory | H | Pump-probe or pulse-response measurement | Open |
-| XPM can produce a detectable product-scale phase shift | H | Heterodyne phase measurement versus power and overlap | Open |
+| Terminal nodes can realize useful complex weights and linear GEMM zones | H | Transfer-matrix calibration across devices and matrix-operation comparison | Open |
+| RSA can provide passive epsilon-thresholding | H | Transmission, hysteresis, recovery, and damage tests | Open |
+| Excited-state relaxation can provide useful lambda-decay temporal context | H | Pump-probe or pulse-response measurement | Open |
+| Q/K XPM can produce a detectable dynamic operand interaction | H | Heterodyne phase measurement versus power, overlap, and pulse timing | Open |
 | A single transit can support useful depth | E | Loss, noise, phase, and crosstalk budget | Open |
 | Unit cost can approach the paper's production targets | E | Measured throughput, yield, packaging, and capital model | Open |
 
@@ -27,25 +28,33 @@ The required XPM or RSA response may demand powers, interaction lengths, or reco
 
 **Mitigation:** characterize mechanisms in standalone test structures before integrating them.
 
-### R3 — Shrinkage distortion
+### R3 — Compiler-to-fabrication mismatch
+
+Inverse shrinkage, material loading, and node placement may change the physical
+weight map enough to invalidate the compiled operation.
+
+**Mitigation:** preserve a design-to-fabrication trace, measure post-shrinkage
+geometry, and close the loop with calibrated transfer-matrix reconstruction.
+
+### R4 — Shrinkage distortion
 
 Isotropic shrinkage may not remain sufficiently uniform around long, dense, or doped structures.
 
 **Mitigation:** measure dimensional metrology at multiple locations and include deformation in inverse design.
 
-### R4 — Defect sensitivity
+### R5 — Defect sensitivity
 
 A localized defect can disrupt a 3D channel or phase relationship across many downstream nodes.
 
 **Mitigation:** define defect classes, inspect statistically, and report yield by functional primitive rather than only by sample.
 
-### R5 — Calibration and packaging
+### R6 — Calibration and packaging
 
 The optical core may work while coupling, alignment, and thermal drift dominate system error.
 
 **Mitigation:** treat packaging as a first-class experiment with alignment tolerances and environmental perturbations.
 
-### R6 — Cost-model optimism
+### R7 — Cost-model optimism
 
 The nominal materials floor excludes the dominant tool, labor, packaging, and yield terms.
 

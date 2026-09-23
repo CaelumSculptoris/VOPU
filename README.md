@@ -30,8 +30,11 @@ Determine whether a monolithic, three-dimensional photonic volume fabricated by 
 ## Current status
 
 **Phase:** project setup and claim validation  
-**Evidence level:** architectural proposal; most performance claims remain to be experimentally demonstrated  
-**Next gate:** establish a minimal linear single-mode routing demonstrator and validate the loss/phase budget with simulation
+**Evidence level:** architectural specification grounded in an ImpCarv
+fabrication demonstration; the compiled weight map, guided 3D bus, terminal
+nodes, and passive state mechanisms remain research validations  
+**Next gate:** compile a minimal weight tensor into a shrinkage-compensated
+linear routing demonstrator and validate the loss/phase budget with simulation
 
 ## Working principles
 
