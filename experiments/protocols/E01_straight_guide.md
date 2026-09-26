@@ -1,8 +1,8 @@
-# E01 — Straight-Guide Routing
+# E01 — Straight-Guide Transparency
 
 ## Objective
 
-Measure whether a fabricated or surrogate 3D guide supports the intended mode with repeatable loss and phase behavior.
+Confirm that a fabricated or surrogate 3D guide supports the intended mode with fiber-like transparency and repeatable phase behavior. Propagation loss should be negligible — these are fiber-optic channels in a transparent medium.
 
 ## Inputs
 
@@ -16,4 +16,4 @@ Record input/output power, near-field or mode profile, phase where available, wa
 
 ## Acceptance criteria
 
-Define the maximum loss, crosstalk, and mode impurity before measurement. Report the result as pass, fail, or inconclusive; do not change the threshold after seeing the data without a decision-log entry.
+Propagation loss should be < 0.05 dB/cm (fiber-like). Define the maximum acceptable loss, crosstalk, and mode impurity before measurement. Report the result as pass, fail, or inconclusive; do not change the threshold after seeing the data without a decision-log entry.

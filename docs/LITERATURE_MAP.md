@@ -8,7 +8,7 @@ Investigate the primary ImpCarv/isotropic-shrinkage work, feature fidelity, shri
 
 #### Added source: ImpCarv vacancy patterning and visible-light metastructures
 
-**Citation:** Yang, Q., Yang, G., Nambara, T. *et al.* “Isotropic shrinkage of patterned vacancies enables three-dimensional nanoprecise metastructures for visible light applications.” *Nature Photonics* 20, 653–663 (2026).  
+**Citation:** Yang, Q., Yang, G., Nambara, T. *et al.* "Isotropic shrinkage of patterned vacancies enables three-dimensional nanoprecise metastructures for visible light applications." *Nature Photonics* 20, 653–663 (2026).  
 **DOI/URL:** https://doi.org/10.1038/s41566-026-01896-1  
 **Research track:** Fabrication; nanophotonics; optical neural networks.
 
@@ -18,11 +18,26 @@ Investigate the primary ImpCarv/isotropic-shrinkage work, feature fidelity, shri
 
 **Measurement method:** Fluorescence imaging during the swollen and partially shrunken stages; SEM and AFM after dehydration; diffraction phase microscopy and index matching for refractive-index characterization; camera-based output intensity measurements for device evaluation.
 
-**Limitations:** The results are demonstrated for specific hydrogel formulations and process conditions; shrinkage and drying must be re-optimized for other materials. The paper does not establish VOPU’s single-mode waveguide loss, 3D routing fidelity, terminal-node transfer matrices, nonlinear response, packaging tolerance, or manufacturing throughput. The optical classifier is a passive diffractive demonstration, not evidence for VOPU’s proposed nonlinear inference substrate.
+**Limitations:** The results are demonstrated for specific hydrogel formulations and process conditions; shrinkage and drying must be re-optimized for other materials. The paper does not establish VOPU's single-mode waveguide transparency, 3D routing fidelity, terminal-node directed scattering patterns, nonlinear response, packaging tolerance, or manufacturing throughput. The optical classifier is a passive diffractive demonstration, not evidence for VOPU's proposed directed-scattering inference substrate.
 
-**How it changes the VOPU claim register:** Upgrade the feasibility basis for sub-100 nm post-shrinkage vacancy fabrication from hypothesis to demonstrated in the cited source, while retaining independent-reproduction and VOPU-specific geometry-to-optical-transfer tests as open requirements. Use the reported shrinkage factors, feature sizes, index contrast, and phase-control measurements as bounded starting inputs rather than as specifications for VOPU’s doped or nonlinear structures.
+**How it changes the VOPU claim register:** Upgrade the feasibility basis for sub-100 nm post-shrinkage vacancy fabrication from hypothesis to demonstrated in the cited source, while retaining independent-reproduction and VOPU-specific geometry-to-scattering-transfer tests as open requirements. Use the reported shrinkage factors, feature sizes, index contrast, and phase-control measurements as bounded starting inputs rather than as specifications for VOPU's doped or nonlinear structures.
 
-**Evidence label:** D for the reported ImpCarv fabrication, metrology, and passive visible-light classifier; H/S for transfer to VOPU’s waveguide and nonlinear architecture.
+**Evidence label:** D for the reported ImpCarv fabrication, metrology, and passive visible-light classifier; H/S for transfer to VOPU's directed-scattering architecture.
+
+### Fiber-optic propagation principle
+
+VOPU waveguide channels are fiber-optic paths in a transparent medium. Propagation loss should be treated as negligible, not as a primary engineering concern.
+
+**Supporting evidence:**
+- Commercial PMMA plastic optical fiber achieves ~0.1 dB/m (0.001 dB/cm) at 520 nm [D — commercial POF specifications].
+- Silica fiber achieves 0.2 dB/km at 1550 nm [D — telecommunications standard].
+- ImpCarv hydrogel is transparent at 532 nm; Rayleigh scattering is minimal in a homogeneous polymer.
+- Surface roughness from ImpCarv fabrication (±12 nm) adds an estimated ~0.01 dB/cm scattering loss [E].
+- Total estimated propagation loss: ~0.011 dB/cm — 23x lower than the REV8 spec's 0.25 dB/cm placeholder.
+
+**How it changes the VOPU claim register:** Reframe propagation loss from a primary risk to a negligible term. The 0.25 dB/cm in the REV8 spec was a conservative placeholder, not a measured value. The real loss terms are coupling, node absorption, and undesired scattering.
+
+**Evidence label:** D for fiber-optic principle; E for VOPU-specific roughness estimate.
 
 ### Integrated photonics
 
@@ -30,15 +45,15 @@ Compare 3D waveguide writing, single-mode routing, volumetric interconnects, pac
 
 ### Optical neural networks
 
-Review diffractive networks, interferometric matrix multiplication, volume holograms, optical nonlinear activations, and photonic transformer demonstrations.
+Review diffractive networks, directed scattering, path integral methods, volume holograms, optical nonlinear activations, and photonic transformer demonstrations.
 
 ### Nonlinear materials
 
-Focus on RSA cross-sections, excited-state kinetics, Kerr/XPM coefficients, nanoparticle enhancement, damage thresholds, and measurement methods.
+Focus on RSA cross-sections (transparent below threshold), excited-state kinetics, Kerr/XPM coefficients, nanoparticle enhancement, damage thresholds, and measurement methods.
 
 ### Modeling
 
-Review FDTD, coupled-mode theory, nonlinear rate equations, uncertainty propagation, inverse design, and calibration of complex optical transfer matrices.
+Review FDTD, coupled-mode theory, directed scattering models, nonlinear rate equations, uncertainty propagation, inverse design, and calibration of complex optical transfer matrices.
 
 ## Concept-provenance sources
 
@@ -55,8 +70,8 @@ They are provenance records, not independent experimental validation:
 - [`Steal Me.pdf`](../Steal%20Me.pdf): VOPU architectural specification
   (document ID SPEC-VOPU-2026-REV6), whose file metadata records creation on
   17 September 2026. It defines the compiled latent-graph workflow, inverse
-  shrinkage compensation, frozen volumetric weight mapping, terminal-node GEMM
-  zones, passive epsilon-thresholding, lambda-decay temporal context, and
+  shrinkage compensation, frozen volumetric weight mapping, terminal-node directed
+  scattering, passive epsilon-thresholding, lambda-decay temporal context, and
   dynamic Q/K cross-phase interaction.
 
 ## VOPU architectural specification
@@ -68,13 +83,14 @@ fabrication systems.
 **Core proposal:** Compile transformer state-dictionary weights (`Wq`, `Wk`,
 `Wv`, and feed-forward weights) into a 3D waveguide topology, terminal-node
 map, and refractive-index/material landscape. A monolithic single-mode optical
-bus routes phase- and amplitude-encoded fields to deterministic terminal
-scattering, reflection, and phase elements.
+bus routes phase- and amplitude-encoded fields to terminal nodes that scatter
+in directed patterns implementing compiled weights. The scattered fields sum
+via path integral at the output.
 
 **State mechanisms:** Reverse-saturable-absorber zones implement proposed
-epsilon-thresholding; excited-state relaxation provides proposed lambda-decay
-temporal context; and Q/K cross-phase modulation provides a proposed dynamic
-operand interaction.
+epsilon-thresholding (transparent below threshold); excited-state relaxation
+provides proposed lambda-decay temporal context; and Q/K cross-phase modulation
+provides a proposed dynamic operand interaction.
 
 **Fabrication workflow:** Two-photon scribing in a swollen polyacrylate
 hydrogel, terminal-node functionalization, ionic dehydration and isotropic
