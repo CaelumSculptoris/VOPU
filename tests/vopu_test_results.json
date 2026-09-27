@@ -1,0 +1,43 @@
+{
+  "phase_test": {
+    "Depth_1": {
+      "uncompensated_fidelity": 0.9615,
+      "precompensated_fidelity": 0.9991,
+      "improvement": "3.9%"
+    },
+    "Depth_5": {
+      "uncompensated_fidelity": 0.8239,
+      "precompensated_fidelity": 0.9956,
+      "improvement": "20.8%"
+    },
+    "Depth_10": {
+      "uncompensated_fidelity": 0.6637,
+      "precompensated_fidelity": 0.9909,
+      "improvement": "49.3%"
+    },
+    "Depth_20": {
+      "uncompensated_fidelity": 0.4523,
+      "precompensated_fidelity": 0.9824,
+      "improvement": "117.2%"
+    },
+    "Depth_30": {
+      "uncompensated_fidelity": 0.2613,
+      "precompensated_fidelity": 0.97,
+      "improvement": "271.2%"
+    },
+    "Depth_50": {
+      "uncompensated_fidelity": 0.1374,
+      "precompensated_fidelity": 0.954,
+      "improvement": "594.2%"
+    }
+  },
+  "loss_budget_test": {
+    "total_loss_db": 1.935,
+    "snr_db": 78.1,
+    "max_supportable_nodes": 897
+  },
+  "deformation_test": {
+    "shrinkage_factor": 5.03,
+    "max_reconstruction_error_um": 0.0
+  }
+}
