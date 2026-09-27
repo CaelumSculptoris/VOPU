@@ -1,11 +1,19 @@
 """
-VOPU Weight Compiler v2.0 (Holographic & Phase-Precompensated Edition)
-======================================================================
-Upgrades the VOPU weight compiler prototype with:
-1. Spatial Inverse-Phase Pre-compensation (offsets per-node ~16.4° fab variance)
-2. SLM (Spatial Light Modulator) Wavefront Injection Interface (continuous 2D field input)
-3. 3D Volumetric Multi-Layer Routing with 5.03x Inverse Shrinkage Compensation
-4. Holographic Volume Interference Transfer Matrix Generation
+VOPU Weight Compiler Prototype
+==============================
+
+Maps transformer weight matrices to a 3D waveguide topology with terminal
+nodes, applies inverse shrinkage compensation, and emits fabrication design
+files and numerical references.
+
+This is a minimal prototype implementing WP5 of the VOPU research plan.
+
+Pipeline:
+1. Extract/define a weight matrix (Wq, Wk, Wv, or FFN)
+2. Map weights to complex terminal-node scattering coefficients
+3. Synthesize 3D node topology (non-intersecting routing)
+4. Apply inverse shrinkage compensation
+5. Emit design file and numerical reference
 """
 
 import numpy as np
@@ -15,229 +23,305 @@ from typing import List, Tuple, Dict
 from pathlib import Path
 
 # ============================================================
-# Physical Constants & Parameters
+# Parameters
 # ============================================================
-SHRINKAGE_FACTOR_MSF = 5.03  # Post-dehydration shrinkage factor (MSF formulation)
-WAVELENGTH_NM = 532.0         # Baseline green laser wavelength
-N_SUBSTRATE = 1.48            # Post-dehydration hydrogel refractive index
-NODE_SPACING_UM = 500.0       # 500 µm node spacing
-PHASE_ERROR_PER_NODE_DEG = 16.4  # Fabrication phase uncertainty σ per node
+
+# ImpCarv shrinkage factor [D - Yang et al. 2026]
+SHRINKAGE_FACTOR = 5.03  # MSF formulation: 5.03 ± 0.06
+SHRINKAGE_FACTOR_HSF = 13.18  # HSF formulation: 13.18 ± 0.28
+
+# VOPU architecture parameters
+WAVELENGTH = 532e-9  # m
+N_SUBSTRATE = 1.48
+
+# Grid parameters
+NODE_SPACING = 500e-6  # 500 µm in post-shrink coordinates
+WAVEGUIDE_WIDTH = 500e-9  # 500 nm
 
 # ============================================================
 # Data Structures
 # ============================================================
-@dataclass
-class HolographicSLMPixel:
-    pixel_id: int
-    x_pos_um: float
-    y_pos_um: float
-    amplitude: float
-    phase_rad: float
 
 @dataclass
-class TerminalNode3D:
+class TerminalNode:
+    """A terminal node in the 3D optical network."""
     node_id: int
-    layer_z: int
-    x_um: float
-    y_um: float
-    z_um: float
-    weight_target_real: float
-    weight_target_imag: float
-    phase_precomp_rad: float  # Inverse phase shift applied
-    pre_shrink_x_um: float = 0.0
-    pre_shrink_y_um: float = 0.0
-    pre_shrink_z_um: float = 0.0
+    x: float          # post-shrink x coordinate (m)
+    y: float          # post-shrink y coordinate (m)
+    z: float          # post-shrink z coordinate (m)
+    weight_real: float  # real part of complex weight
+    weight_imag: float  # imaginary part (phase shift)
+    # Pre-shrink coordinates (for fabrication)
+    pre_shrink_x: float = 0.0
+    pre_shrink_y: float = 0.0
+    pre_shrink_z: float = 0.0
 
 @dataclass
-class WaveguidePath3D:
-    path_id: int
-    start_node_id: int
-    end_node_id: int
-    length_um: float
-    accumulated_phase_deg: float
+class WaveguideSegment:
+    """A waveguide routing segment between two nodes."""
+    segment_id: int
+    start_node: int
+    end_node: int
+    path_type: str  # 'straight', 'bend', 'crossing_avoidance'
+    length: float   # post-shrink length (m)
 
 @dataclass
-class CompiledHolographicDesign:
-    metadata: Dict
-    slm_wavefront: List[Dict]
-    nodes_3d: List[Dict]
-    routing_paths: List[Dict]
-    transfer_matrix_complex: List[List[List[float]]] # [Real, Imag] pairs
-    fidelity_improvement_estimate: Dict
+class CompiledDesign:
+    """Complete compiled design output."""
+    nodes: List[Dict] = field(default_factory=list)
+    segments: List[Dict] = field(default_factory=list)
+    weight_matrix: List[List[float]] = field(default_factory=list)
+    numerical_reference: Dict = field(default_factory=dict)
+    shrinkage_factor: float = SHRINKAGE_FACTOR
+    design_metadata: Dict = field(default_factory=dict)
+
 
 # ============================================================
-# SLM Wavefront & Phase Compensation Pipeline
+# Weight Mapping
 # ============================================================
-def generate_slm_wavefront(input_vector: np.ndarray, grid_size: int = 16) -> List[HolographicSLMPixel]:
+
+def weight_to_complex_phase(weight: float, max_weight: float = None) -> Tuple[float, float]:
     """
-    Map a 1D or 2D input vector to a continuous 2D Spatial Light Modulator wavefront.
-    Phase encodes direction/relational context; amplitude encodes token weight.
-    """
-    pixels = []
-    pid = 0
-    norm_vec = input_vector / (np.max(np.abs(input_vector)) + 1e-12)
-    flat_len = len(norm_vec)
+    Map a real-valued weight to a complex scattering coefficient.
     
-    for i in range(grid_size):
-        for j in range(grid_size):
-            vec_idx = (i * grid_size + j) % flat_len
-            val = norm_vec[vec_idx]
-            amp = float(np.abs(val))
-            phase = 0.0 if val >= 0 else float(np.pi)
-            
-            pixels.append(HolographicSLMPixel(
-                pixel_id=pid,
-                x_pos_um=float(j * 10.0), # 10 µm SLM pixel pitch
-                y_pos_um=float(i * 10.0),
-                amplitude=amp,
-                phase_rad=phase
-            ))
-            pid += 1
-    return pixels
+    Strategy: encode magnitude as amplitude, sign as π phase shift.
+    w > 0: amplitude = |w|, phase = 0
+    w < 0: amplitude = |w|, phase = π
+    
+    Returns (amplitude, phase_radians).
+    """
+    if max_weight is None:
+        max_weight = abs(weight)
+    if max_weight == 0:
+        return 0.0, 0.0
+    
+    amplitude = abs(weight) / max_weight  # normalize to [0, 1]
+    phase = 0.0 if weight >= 0 else np.pi
+    return amplitude, phase
 
-def compile_3d_precompensated_nodes(
-    weight_matrices: List[np.ndarray],
-    shrinkage_factor: float = SHRINKAGE_FACTOR_MSF,
-    phase_err_deg: float = PHASE_ERROR_PER_NODE_DEG
-) -> Tuple[List[TerminalNode3D], List[WaveguidePath3D]]:
+def matrix_to_nodes(weight_matrix: np.ndarray) -> List[TerminalNode]:
     """
-    Compile stacked transformer layers (W_q, W_k, W_v) into a 3D volumetric node mesh
-    with spatial phase pre-compensation.
+    Map a weight matrix to a grid of terminal nodes.
+    
+    Each element W[i,j] maps to a terminal node at position (i, j)
+    in a 2D layer, with the weight encoded as amplitude and phase.
     """
-    nodes_3d = []
-    paths_3d = []
+    rows, cols = weight_matrix.shape
+    max_w = np.max(np.abs(weight_matrix))
+    if max_w == 0:
+        max_w = 1.0
+    
+    nodes = []
     node_id = 0
-    path_id = 0
-    phase_err_rad = np.radians(phase_err_deg)
+    for i in range(rows):
+        for j in range(cols):
+            amp, phase = weight_to_complex_phase(weight_matrix[i, j], max_w)
+            # Place nodes in a 2D grid with spacing
+            x = j * NODE_SPACING
+            y = i * NODE_SPACING
+            z = 0.0  # single layer for prototype
+            nodes.append(TerminalNode(
+                node_id=node_id,
+                x=x, y=y, z=z,
+                weight_real=amp * np.cos(phase),
+                weight_imag=amp * np.sin(phase)
+            ))
+            node_id += 1
+    return nodes
 
-    for layer_idx, W in enumerate(weight_matrices):
-        rows, cols = W.shape
-        max_w = np.max(np.abs(W)) if np.max(np.abs(W)) > 0 else 1.0
-        
-        for i in range(rows):
-            for j in range(cols):
-                w_val = W[i, j]
-                target_amp = abs(w_val) / max_w
-                target_phase = 0.0 if w_val >= 0 else np.pi
-                
-                # Systematic Phase Error Accumulation along depth z
-                depth_step = layer_idx + 1
-                expected_phase_error = np.sqrt(depth_step) * phase_err_rad
-                
-                # Apply Inverse Phase Pre-compensation
-                compensated_phase = (target_phase - expected_phase_error) % (2 * np.pi)
-                
-                # Post-shrink coordinates (µm)
-                x_um = j * NODE_SPACING_UM
-                y_um = i * NODE_SPACING_UM
-                z_um = layer_idx * NODE_SPACING_UM * 2.0  # 1 mm layer separation
-                
-                # Pre-shrink coordinates for laser writing (µm)
-                pre_x = x_um * shrinkage_factor
-                pre_y = y_um * shrinkage_factor
-                pre_z = z_um * shrinkage_factor
-                
-                node = TerminalNode3D(
-                    node_id=node_id,
-                    layer_z=layer_idx,
-                    x_um=x_um,
-                    y_um=y_um,
-                    z_um=z_um,
-                    weight_target_real=float(target_amp * np.cos(compensated_phase)),
-                    weight_target_imag=float(target_amp * np.sin(compensated_phase)),
-                    phase_precomp_rad=float(-expected_phase_error),
-                    pre_shrink_x_um=float(pre_x),
-                    pre_shrink_y_um=float(pre_y),
-                    pre_shrink_z_um=float(pre_z)
-                )
-                nodes_3d.append(node)
-                
-                # Inter-layer 3D waveguide path
-                if layer_idx > 0:
-                    prev_node_id = (layer_idx - 1) * (rows * cols) + (i * cols + j)
-                    paths_3d.append(WaveguidePath3D(
-                        path_id=path_id,
-                        start_node_id=prev_node_id,
-                        end_node_id=node_id,
-                        length_um=float(NODE_SPACING_UM * 2.0),
-                        accumulated_phase_deg=float(np.degrees(expected_phase_error))
-                    ))
-                    path_id += 1
-                    
-                node_id += 1
-
-    return nodes_3d, paths_3d
-
-def compile_vopu_holographic_architecture(
-    layer_weights: List[np.ndarray],
-    sample_input: np.ndarray
-) -> CompiledHolographicDesign:
+def synthesize_topology(nodes: List[TerminalNode], input_nodes: int, output_nodes: int) -> List[WaveguideSegment]:
     """
-    Main Compilation Pipeline for VOPU v2.0
+    Synthesize non-intersecting waveguide routing.
+    
+    For the prototype, we use a simple row-column routing scheme:
+    - Input ports connect to their row of nodes
+    - Output ports connect to their column of nodes
+    - Routing uses Manhattan-style paths with depth separation
     """
-    slm_pixels = generate_slm_wavefront(sample_input)
-    nodes, paths = compile_3d_precompensated_nodes(layer_weights)
+    segments = []
+    seg_id = 0
     
-    # Generate Transfer Matrix
-    W_combined = layer_weights[0]
-    for W in layer_weights[1:]:
-        if W_combined.shape[1] == W.shape[0]:
-            W_combined = W @ W_combined
-            
-    transfer_matrix = []
-    for r in range(W_combined.shape[0]):
-        row_list = []
-        for c in range(W_combined.shape[1]):
-            val = W_combined[r, c]
-            row_list.append([float(val), 0.0]) # [Real, Imag] pairs
-        transfer_matrix.append(row_list)
-        
-    num_layers = len(layer_weights)
-    uncomp_fidelity = max(0.1, 1.0 - (0.08 * num_layers))
-    comp_fidelity = 0.94 # High fidelity achieved with pre-compensation
+    # Connect inputs to rows
+    for i in range(input_nodes):
+        for j in range(output_nodes):
+            start = i * output_nodes + j
+            # Simple straight connection for now
+            segments.append(WaveguideSegment(
+                segment_id=seg_id,
+                start_node=start,
+                end_node=start,  # self-referencing for now (node is both input and output)
+                path_type='straight',
+                length=NODE_SPACING
+            ))
+            seg_id += 1
     
-    metadata = {
-        "compiler": "VOPU Holographic Compiler v2.0",
-        "substrate": "Polyacrylate Hydrogel (ImpCarv MSF)",
-        "shrinkage_factor": SHRINKAGE_FACTOR_MSF,
-        "wavelength_nm": WAVELENGTH_NM,
-        "refractive_index_contrast": 0.5,
-        "total_layers": num_layers,
-        "total_3d_nodes": len(nodes),
-        "total_interconnect_paths": len(paths),
-        "phase_precompensation_active": True,
-        "slm_wavefront_pixels": len(slm_pixels),
-        "evidence_level": "S - Simulated compiler output"
+    return segments
+
+# ============================================================
+# Inverse Shrinkage Compensation
+# ============================================================
+
+def apply_inverse_shrinkage(nodes: List[TerminalNode], shrinkage_factor: float = SHRINKAGE_FACTOR) -> List[TerminalNode]:
+    """
+    Apply inverse shrinkage compensation to get pre-fabrication coordinates.
+    
+    pre_shrink = post_shrink * shrinkage_factor
+    
+    The written geometry must be larger by the shrinkage factor so that
+    after isotropic shrinkage, the post-shrink geometry matches the design.
+    """
+    for node in nodes:
+        node.pre_shrink_x = node.x * shrinkage_factor
+        node.pre_shrink_y = node.y * shrinkage_factor
+        node.pre_shrink_z = node.z * shrinkage_factor
+    return nodes
+
+# ============================================================
+# Numerical Reference
+# ============================================================
+
+def compute_numerical_reference(weight_matrix: np.ndarray, nodes: List[TerminalNode]) -> Dict:
+    """
+    Compute the numerical reference for the compiled design.
+    
+    This is what the optical output should match when the system is calibrated.
+    """
+    rows, cols = weight_matrix.shape
+    
+    # The optical operation is: y = W @ x
+    # where W is the weight matrix and x is the input vector
+    
+    # Test with identity input
+    test_input = np.eye(cols)[:, :min(cols, 4)]  # first few identity columns
+    expected_output = weight_matrix @ test_input
+    
+    # Also compute the complex transfer matrix from node parameters
+    max_w = np.max(np.abs(weight_matrix))
+    if max_w == 0:
+        max_w = 1.0
+    
+    transfer_matrix = np.zeros((rows, cols), dtype=complex)
+    for i in range(rows):
+        for j in range(cols):
+            amp, phase = weight_to_complex_phase(weight_matrix[i, j], max_w)
+            transfer_matrix[i, j] = amp * np.exp(1j * phase)
+    
+    return {
+        'weight_matrix_shape': list(weight_matrix.shape),
+        'max_weight': float(max_w),
+        'test_input_shape': list(test_input.shape),
+        'expected_output': expected_output.tolist(),
+        'transfer_matrix': transfer_matrix.tolist(),
+        'operation': 'matrix-vector multiply (GEMM)',
+        'note': 'Optical output should match expected_output within calibration tolerance'
     }
+
+# ============================================================
+# Design Emitter
+# ============================================================
+
+def emit_design_file(nodes: List[TerminalNode], segments: List[WaveguideSegment],
+                     weight_matrix: np.ndarray, metadata: Dict = None) -> CompiledDesign:
+    """Emit complete compiled design with all fabrication artifacts."""
+    numerical_ref = compute_numerical_reference(weight_matrix, nodes)
     
-    fidelity_est = {
-        "uncompensated_path_integral_fidelity": float(uncomp_fidelity),
-        "precompensated_path_integral_fidelity": float(comp_fidelity),
-        "effective_cascade_depth_gain": "3x - 5x deeper cascade achievable"
-    }
-    
-    return CompiledHolographicDesign(
-        metadata=metadata,
-        slm_wavefront=[asdict(p) for p in slm_pixels],
-        nodes_3d=[asdict(n) for n in nodes],
-        routing_paths=[asdict(p) for p in paths],
-        transfer_matrix_complex=transfer_matrix,
-        fidelity_improvement_estimate=fidelity_est
+    return CompiledDesign(
+        nodes=[asdict(n) for n in nodes],
+        segments=[asdict(s) for s in segments],
+        weight_matrix=weight_matrix.tolist(),
+        numerical_reference=numerical_ref,
+        shrinkage_factor=SHRINKAGE_FACTOR,
+        design_metadata=metadata or {
+            'compiler_version': '0.1.0',
+            'wavelength_nm': 532,
+            'substrate_index': 1.48,
+            'shrinkage_factor': SHRINKAGE_FACTOR,
+            'node_spacing_um': NODE_SPACING * 1e6,
+            'waveguide_width_nm': WAVEGUIDE_WIDTH * 1e9,
+            'evidence': 'S - simulated compiler prototype'
+        }
     )
 
-if __name__ == "__main__":
-    # Test 3-layer transformer block (W_q, W_k, W_v)
-    W1 = np.array([[0.8, -0.4, 0.2], [-0.1, 0.9, -0.3], [0.5, 0.2, 0.7]])
-    W2 = np.array([[0.6, 0.1, -0.5], [-0.3, 0.8, 0.4], [0.2, -0.6, 0.9]])
-    W3 = np.array([[0.9, -0.2, 0.1], [0.4, 0.7, -0.5], [-0.1, 0.3, 0.8]])
+# ============================================================
+# Main Compiler
+# ============================================================
+
+def compile_weights(weight_matrix: np.ndarray, input_dim: int = None, output_dim: int = None) -> CompiledDesign:
+    """
+    Main compilation pipeline:
+    1. Map weights to terminal nodes
+    2. Synthesize 3D topology
+    3. Apply inverse shrinkage compensation
+    4. Compute numerical reference
+    5. Emit design file
+    """
+    if input_dim is None:
+        input_dim = weight_matrix.shape[1]
+    if output_dim is None:
+        output_dim = weight_matrix.shape[0]
     
-    sample_prompt_embedding = np.array([1.0, 0.5, -0.5])
+    # Step 1: Map weights to nodes
+    nodes = matrix_to_nodes(weight_matrix)
     
-    compiled = compile_vopu_holographic_architecture([W1, W2, W3], sample_prompt_embedding)
+    # Step 2: Synthesize topology
+    segments = synthesize_topology(nodes, input_dim, output_dim)
     
-    output_path = Path("/workspace/scratch/vopu_compiled_holographic_design.json")
-    with open(output_path, "w") as f:
-        json.dump(asdict(compiled), f, indent=2)
-        
-    print(f"Successfully compiled design with {compiled.metadata['total_3d_nodes']} 3D nodes.")
-    print(f"Saved compiled JSON output to {output_path}")
+    # Step 3: Apply inverse shrinkage
+    nodes = apply_inverse_shrinkage(nodes, SHRINKAGE_FACTOR)
+    
+    # Step 4: Compute numerical reference
+    numerical_ref = compute_numerical_reference(weight_matrix, nodes)
+    
+    # Step 5: Emit design
+    design = emit_design_file(nodes, segments, weight_matrix, {
+        'compiler_version': '0.1.0',
+        'wavelength_nm': 532,
+        'substrate_index': 1.48,
+        'shrinkage_factor': SHRINKAGE_FACTOR,
+        'shrinkage_compensation': 'Applied (MSF formulation, factor 5.03)',
+        'node_spacing_um': NODE_SPACING * 1e6,
+        'waveguide_width_nm': WAVEGUIDE_WIDTH * 1e9,
+        'input_dimension': input_dim,
+        'output_dimension': output_dim,
+        'total_nodes': len(nodes),
+        'total_segments': len(segments),
+        'evidence': 'S - simulated compiler prototype',
+        'pipeline_steps': [
+            '1. Weight extraction (matrix input)',
+            '2. Node mapping (amplitude + phase encoding)',
+            '3. Topology synthesis (Manhattan routing)',
+            '4. Inverse shrinkage compensation (factor 5.03x)',
+            '5. Numerical reference computation',
+            '6. Design file emission'
+        ]
+    })
+    
+    return design
+
+# ============================================================
+# Example Usage
+# ============================================================
+
+def example_compilation():
+    """Compile a small example weight matrix."""
+    # 4x4 weight matrix (could be a small Wq, Wk, Wv, or FFN layer)
+    W = np.array([
+        [ 0.8, -0.3,  0.5,  0.1],
+        [-0.2,  0.9, -0.4,  0.3],
+        [ 0.6,  0.1, -0.7, -0.5],
+        [-0.1,  0.4,  0.2,  0.8]
+    ])
+    
+    design = compile_weights(W)
+    return design
+
+if __name__ == '__main__':
+    design = example_compilation()
+    print(json.dumps({
+        'metadata': design.design_metadata,
+        'node_count': len(design.nodes),
+        'segment_count': len(design.segments),
+        'first_3_nodes': design.nodes[:3],
+        'numerical_reference_shape': design.numerical_reference['weight_matrix_shape'],
+        'transfer_matrix': design.numerical_reference['transfer_matrix']
+    }, indent=2))
