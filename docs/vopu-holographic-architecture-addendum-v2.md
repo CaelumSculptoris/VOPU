@@ -1,5 +1,7 @@
 # Architectural Addendum: Distributed 3D Volume Holography in VOPU
 
+**Status:** Superseded copy. Use [ARCHITECTURE_ADDENDUM_REV8.1.md](./ARCHITECTURE_ADDENDUM_REV8.1.md) for the current guided-channel design and evidence status.
+
 **Document Version:** REV8.2 — Holographic Paradigm & Literature Integration  
 **System:** Volumetric Optical Processing Unit (VOPU)  
 **Classification:** Core System Architecture Specification  
@@ -20,7 +22,7 @@ While traditional optical computing approaches rely either on planar 2D photonic
 In conventional volume holography, a single continuous plate or emulsion records interference fringes. Reconstructing the field requires illuminating the entire plate, which introduces severe angular crosstalk and limits the system to single-pass matrix operations.
 
 VOPU breaks the flat surface into a **spatially distributed 3D node mesh**:
-1. **Targeted Spatial Transport:** Single-mode 3D optical channels carved into hydrogel/glass act with fiber-optic transparency ($\sim 0.011\text{ dB/cm}$ propagation attenuation), guiding input optical fields directly to designated 3D coordinate locations without free-space diffraction loss (*Onodera et al., arXiv:2402.17750*).
+1. **Targeted Spatial Transport (design hypothesis):** Two-photon vacancy patterning creates elongated hollow-core channels. The cavities are liquid-filled during washing; solvent exchange, shrinkage, and supercritical drying are intended to remove that liquid, with the final mode proposed to propagate in the gas-filled lumen. See the current REV8.6 addendum for cavity-boundary confinement and sources.
 2. **Localized Micro-Hologram Nodes:** Each sub-wavelength terminal node functions as a discrete, localized holographic scatterer. Its nanoscale geometry and localized index contrast set a precise complex scattering coefficient:
    $$S_i = a_i e^{i\phi_i}$$
 3. **Volumetric Field Reconstruction:** As coherent light passes through sequential node layers across the 3D volume, the scattered wavelets overlap and interfere constructively and destructively. The optical field emerging at the output photodetector array represents the reconstructed solution to the compiled path integral equation (*Chen et al., Adv. Intell. Syst. 2023*).
@@ -34,7 +36,7 @@ VOPU breaks the flat surface into a **spatially distributed 3D node mesh**:
 │            (High Angular Crosstalk)   │   │      [Node] ──► [Node] ──► [Node]         │
 └───────────────────────┬───────────────┘   └────────────────────────────┬──────────────┘
                         ▼                                                ▼
-            1-Layer Matrix Product                      Deep Multi-Layer Transformer
+            1-Layer Matrix Product                Proposed optical operation + decoder
 ```
 
 ---
@@ -66,30 +68,30 @@ Where $S_m = a_m e^{i \phi_m}$ represents the local weight multiplication at nod
 | :--- | :--- | :--- | :--- |
 | **Medium Topology** | Flat 2D Silicon / LNOB Wafer | Flat 2D Surface / Thin Film | Monolithic 3D Hydrogel / Glass Solid |
 | **Interaction Primitive** | Waveguide Phase Shifters | Surface Diffraction | 3D Volumetric Wave Scattering |
-| **Routing Limits** | Severe 2D Waveguide Crossings | High Angular Crosstalk | Zero Waveguide Crossings (3D Spatial Routing) |
-| **Weight Encoding** | Active Voltage / Heat | Fixed 2D Surface Grating | Frozen 3D Index Landscape ($\Delta n \approx 0.5$) |
-| **Cascability & Depth** | 2D Array Footprint Bottleneck | Single-Pass Only | Deep Multi-Layer 3D Graph |
-| **Complex Weights ($\mathbb{C}$)**| Dual-rail Power Splits | Phase-only Modulators | Native Spatial Phase Shift ($e^{i\phi}$) |
+| **Routing Limits** | Architecture-dependent | Angular crosstalk depends on design | 3D routing may reduce planar crossing constraints; VOPU performance is unmeasured |
+| **Weight Encoding** | Active control | Fixed surface pattern | Proposed 3D index landscape and local scattering structures |
+| **Cascability & Depth** | Architecture-dependent | Design-dependent | Multi-stage depth is a target, not a demonstrated result |
+| **Complex Weights ($\mathbb{C}$)**| Architecture-dependent | Often phase/amplitude constrained | Proposed calibrated complex transfer coefficients; not validated |
 
 ---
 
 ## 4. Wavefront Injection & Dynamic Adaptation
 
-### 4.1 SLM Wavefront Injection
-Instead of feeding discrete digital numbers into individual fiber ports, runtime input prompts are encoded onto a coherent optical beam using a Spatial Light Modulator (SLM). The SLM generates a high-dimensional complex wavefront $\mathbf{E}_{\text{in}}(x, y, \phi)$ that matches the physical input aperture of the 3D VOPU waveguide array.
+### 4.1 Prompt-derived input encoding and wavefront injection
+A prompt is not injected as text. A digital front end tokenizes it and computes numerical features for a selected, bounded model operation. An optical encoder maps those values to calibrated amplitudes and phases across input ports or spatial modes; a coherent source and SLM or equivalent modulator prepare the input field $\mathbf{E}_{\text{in}}$ for the measured input basis of the device. The encoded field is runtime data, while the fabricated structure is intended to hold fixed analog weights.
 
-### 4.2 Dynamic Holography & Linear-Media Nonlinearities
-While the core tensor weight landscape is static, real-time contextual adaptivity and nonlinearities are supported through two parallel mechanisms:
-* **Linear Wave Scattering Activations:** As demonstrated by *Wanjura & Marquardt (Nature Physics 2024)* and *Yildirim et al. (Nature Photonics 2024)*, boundary mappings and intensity detection of multi-pass wave scattering execute universal nonlinear activation functions without needing active electronic conversion.
-* **Nonlinear Material Zones:** Embedded Reverse Saturable Absorption (RSA) with Lead Phthalocyanine (PbPc) dopants acts as intensity-dependent holographic gates ($\epsilon$-thresholding). Organic chromophores ($n_2 \sim 10^{-16}\text{ m}^2/\text{W}$) enable Cross-Phase Modulation (XPM) for dynamic Query/Key attention interactions.
+### 4.2 Optical operation, readout, and decoding
+In a calibrated linear regime, the volume is modeled by a measured transfer operator, $\mathbf{E}_{\text{out}}=T\mathbf{E}_{\text{in}}$. Coherent path contributions interfere to produce the optical result for that compiled operation. Detectors measure intensity and, when required, phase; coherent detection is needed when recovering complex-field information, since intensity-only detection is not a general complex-field measurement. Calibration software reconstructs numerical outputs and maps them to the next operation or output scores/tokens. Autoregressive language-model inference would require repeated encode/compute/readout/decoder stages unless those stages are independently implemented optically.
+
+Related studies of nonlinear processing with linear optics motivate possible system designs, but do not establish that VOPU's specific material or geometry implements them. RSA, excited-state lifetime effects, and XPM are candidate material mechanisms; their useful response, speed, and process compatibility remain experimental questions, not working VOPU gates or attention operations.
 
 ---
 
 ## 5. Engineering Calibration & Phase Budget
 
 Because VOPU operates as a phase-coherent volume hologram, spatial phase accuracy governs the path integral fidelity:
-* **Current Phase Uncertainty:** Fabrication tolerances ($\pm 12\text{ nm}$) introduce $\sim 16.4^\circ$ of phase error per node.
-* **Holographic Compensation Requirement:** To scale cascade depth beyond 5–10 node layers to deep 700+ node volumes, the weight compiler must apply inverse spatial phase pre-distortion during the Implosion Carving (ImpCarv) writing phase, pre-canceling systematic optical path variations across the 3D volume.
+* **Phase uncertainty:** Any phase-error estimate must specify wavelength, material index, geometry, and the propagation model; a feature-size tolerance alone does not establish a universal per-node phase error.
+* **Calibration:** Measure propagation, bend, node, and phase errors in fabricated guides before predicting useful depth. The compiler may compensate systematic optical-path variations; deep-volume performance is not established.
 
 ---
 

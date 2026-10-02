@@ -10,7 +10,7 @@ Extract every quantitative claim from the source papers and architectural specif
 
 ### WP2 — Directed scattering primitive
 
-Model and test a short 3D single-mode waveguide path, a terminal node, and the directed scattering pattern it produces. Establish mode quality, channel transparency (fiber-like propagation), scattering efficiency (directed fraction vs. absorbed/mismatched), and phase stability.
+Model and test a short hollow-core 3D path defined by elongated ImpCarv cavities. Track the cavity from liquid-filled post-exposure state through washing, solvent exchange, ionic shrinkage, and supercritical drying; then characterize its final mode and loss. Separately test dopant-mediated reflective-node conversion, reflectance, angular scattering, and phase stability.
 
 **Deliverables:** baseline model, test fixture, scattering pattern measurements, scattering efficiency characterization.
 
@@ -18,7 +18,7 @@ Model and test a short 3D single-mode waveguide path, a terminal node, and the d
 
 Extend WP2 to multiple nodes and non-intersecting paths. Determine how phase error, scattering pattern variation, and path integral fidelity accumulate with depth. Validate that the summed scattered fields match the numerical reference.
 
-**Deliverables:** depth-vs-fidelity curves and a validated cascability budget based on phase precision, not loss.
+**Deliverables:** depth-vs-fidelity curves and a validated cascability budget based on measured propagation, mode, scattering, and phase errors.
 
 ### WP4 — Nonlinear and temporal materials
 
@@ -34,9 +34,9 @@ Build the latent-graph compiler that extracts `Wq`, `Wk`, `Wv`, and feed-forward
 
 ### WP6 — System-level inference primitive
 
-Implement the compiler and one narrow, measurable operation such as a calibrated matrix-vector product, thresholded classifier, or low-dimensional Q/K/V interaction. Compare the path integral output with a numerical reference.
+Implement the compiler and one narrow, measurable operation such as a calibrated matrix-vector product or thresholded classifier. Specify a prompt preprocessing step that produces the operation's numerical input, map it to a calibrated coherent optical field, measure and reconstruct the output, then decode it for the bounded task. Compare the complete digital/optical path with a numerical reference; do not equate this milestone with a complete language model.
 
-**Deliverables:** dataset, calibration procedure, error analysis, repeatability report.
+**Deliverables:** task and prompt preprocessing definition, optical encoder calibration, detector/readout and decoder, dataset, end-to-end error analysis, repeatability report.
 
 ### WP7 — Manufacturing and economics
 
@@ -49,8 +49,8 @@ Replace nominal cost assumptions with measured write time, precursor usage, pack
 | ID | Milestone | Exit condition |
 |---|---|---|
 | M0 | Research baseline | Charter, claim register, and reproducibility conventions complete |
-| M1 | Linear path validated | Single-mode routing with fiber-like transparency and repeatable phase measurement |
-| M2 | Node validated | Terminal-node directed scattering pattern is calibrated and scattering efficiency measured |
+| M1 | Cavity channel validated | Verified post-process gas-filled lumen with a measured guided mode, loss, and phase behavior meeting pre-registered criteria |
+| M2 | Reflective node validated | Dopant-mediated metal feature and directed angular response are repeatable and calibrated |
 | M3 | Path integral validated | Multi-node summed scattered fields match numerical reference within tolerance |
 | M4 | Nonlinearity characterized | At least one nonlinear mechanism has a quantified usable range |
 | M5 | Primitive demonstrated | End-to-end optical operation beats a defined error threshold |

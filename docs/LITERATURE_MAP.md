@@ -26,18 +26,24 @@ Investigate the primary ImpCarv/isotropic-shrinkage work, feature fidelity, shri
 
 ### Fiber-optic propagation principle
 
-VOPU waveguide channels are fiber-optic paths in a transparent medium. Propagation loss should be treated as negligible, not as a primary engineering concern.
+Optical confinement does not require a conventionally drawn fiber; it requires a suitable optical mode and boundary. VOPU's selected routing features are elongated ImpCarv-written hollow cavities, not isolated spherical nodes, and the intended mode is in the lumen. The cavity/gel index change is central to the optical boundary, but an air-filled cavity is lower-index than hydrogel. Thus the water-jet experiment supports interface-guided transport as an analogy, not ordinary TIR for this reversed index ordering. The current design hypothesis is hollow-core confinement through an engineered antiresonant or photonic-bandgap boundary.
 
-**Supporting evidence:**
-- Commercial PMMA plastic optical fiber achieves ~0.1 dB/m (0.001 dB/cm) at 520 nm [D — commercial POF specifications].
-- Silica fiber achieves 0.2 dB/km at 1550 nm [D — telecommunications standard].
-- ImpCarv hydrogel is transparent at 532 nm; Rayleigh scattering is minimal in a homogeneous polymer.
-- Surface roughness from ImpCarv fabrication (±12 nm) adds an estimated ~0.01 dB/cm scattering loss [E].
-- Total estimated propagation loss: ~0.011 dB/cm — 23x lower than the REV8 spec's 0.25 dB/cm placeholder.
+**Primary sources and what they support:**
 
-**How it changes the VOPU claim register:** Reframe propagation loss from a primary risk to a negligible term. The 0.25 dB/cm in the REV8 spec was a conservative placeholder, not a measured value. The real loss terms are coupling, node absorption, and undesired scattering.
+- **Nilsson, T., Wagner, F., Housh, R., & Richerzhagen, B.** (2004). “Scribing of GaN wafer for white LED by water-jet-guided laser.” *SPIE Proceedings* 5366, 200. https://doi.org/10.1117/12.529012. Demonstrates practical laser delivery using a water jet; it is not a measurement of a static solid channel or VOPU propagation loss.
+- **Risk, W. P., Kim, H.-C., Miller, R. D., Temkin, H., & Gangopadhyay, S.** (2004). “Optical waveguides with an aqueous core and a low-index nanoporous cladding.” *Optics Express* 12(26), 6446–6455. https://doi.org/10.1364/OPEX.12.006446. Demonstrates that an aqueous core can be guided when paired with an intentionally lower-index nanoporous cladding; it reinforces the need to engineer the boundary.
+- **Panusa, G., Pu, Y., Wang, J., Moser, C., & Psaltis, D.** (2020). “Fabrication of Sub-Micron Polymer Waveguides through Two-Photon Polymerization in Polydimethylsiloxane.” *Polymers* 12(11), 2485. https://doi.org/10.3390/polym12112485. Reports 5-cm 2PP-written polymer guides with index contrast on the order of 0.005 and 0.1 dB/cm loss at 710 nm. This is a useful fabrication benchmark, not a transfer value for ImpCarv hydrogel.
+- **Wang, Y., Huang, C.-J., Jonas, U., Wei, T., Dostalek, J., & Knoll, W.** (2010). “Biosensor based on hydrogel optical waveguide spectroscopy.” *Biosensors and Bioelectronics* 25(7), 1663–1668. https://doi.org/10.1016/j.bios.2009.12.003. Demonstrates a planar hydrogel waveguiding geometry, not a low-loss 3D routing bus.
+- **Oran, D., Rodriques, S. G., Gao, R., et al.** (2018). “3D nanofabrication by volumetric deposition and controlled shrinkage of patterned scaffolds.” *Science* 362(6420), 1281–1285. https://doi.org/10.1126/science.aau5119. Supports 3D scaffold patterning and shrinkage; it does not report guided-mode propagation loss.
+- **Cregan, R. F., Mangan, B. J., Knight, J. C., et al.** (1999). “Single-mode photonic band gap guidance of light in air.” *Science* 285(5433), 1537–1539. https://doi.org/10.1126/science.285.5433.1537. Demonstrates hollow/air-core guidance using a photonic-bandgap cladding, not ordinary TIR at a low-index core/high-index wall.
+- **Argyros, A., Birks, T. A., Leon-Saval, S. G., et al.** (2008). “Antiresonant reflection and inhibited coupling in hollow-core square lattice optical fibres.” *Optics Express* 16(8), 5642. https://doi.org/10.1364/OE.16.005642. Demonstrates hollow-core guidance using engineered antiresonant/inhibited-coupling structure, not a plain void in bulk gel.
+- **Machida, S., et al.** (2021). “Anionic fluorophore-assisted fabrication of gold microstructures inside a hydrogel by multi-photon photoreduction.” *Optical Materials Express* 11(1), 48. https://doi.org/10.1364/OME.412066. Demonstrates a specific fluorophore-assisted gold-forming chemistry in hydrogel. It does not establish the VOPU dopant recipe, reflective-facet performance, or survival through ImpCarv processing.
 
-**Evidence label:** D for fiber-optic principle; E for VOPU-specific roughness estimate.
+**VOPU design hypothesis:** replace isolated vacancy nodes along selected routes with a continuous, elongated hollow lumen. The lumen is liquid-filled during washing; solvent exchange, ionic shrinkage, and supercritical-CO2 drying are intended to remove that liquid and leave a gas-filled channel in the final hydrogel. Verify residue removal and lumen continuity. The intended mode propagates inside the final cavity. The cavity/gel index variation forms the optical boundary, but with gas inside higher-index gel it does not produce ordinary TIR back into the lumen. Test a plain lumen first, then surrounding ImpCarv cavities that leave thin hydrogel webs and may provide antiresonant reflection; separately explore a periodic vacancy boundary if needed for a photonic bandgap. Compare post-shrink vector-mode predictions, near-field imaging, and cutback loss. A two-photon-polymerized solid-core guide remains a process benchmark, not the presumed VOPU geometry.
+
+**Separate node hypothesis:** two-photon-triggered dopant chemistry may form localized metallic reflective facets. Measure conversion chemistry, reflectance, absorption, facet geometry/orientation, and angular scattering; hydrogel photoreduction literature is a specific precedent, not validation of the VOPU formulation.
+
+**Evidence label:** D for the cited guiding/fabrication results in their reported geometries; H for transfer to ImpCarv cavity channels and dopant-mediated reflective nodes; E only for calculations explicitly using measured post-process indices and geometry.
 
 ### Integrated photonics
 

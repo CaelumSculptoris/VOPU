@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-VOPU investigates whether three-dimensional refractive-index programming by Implosion Carving can encode transformer weights in a monolithic optical substrate with bound waveguides, directed scattering nodes, and localized passive nonlinear dynamics.
+VOPU investigates whether three-dimensional refractive-index programming by Implosion Carving can encode weights for bounded inference operations in a monolithic optical substrate, as part of a hybrid optical/electronic pipeline that converts prompt data to optical fields and decoded outputs. Proposed physical elements include hollow-cavity channels, directed scattering nodes, and localized passive nonlinear dynamics.
 
 ## 2. Primary research question
 
@@ -10,10 +10,12 @@ Can a monolithic 3D photonic volume implement a useful, measurable inference pri
 
 ## 3. Sub-questions
 
-- Can post-shrinkage waveguides remain single-mode and transparent over useful lengths (fiber-optic principle)?
+- Do elongated ImpCarv-written cavities remain open through washing, solvent exchange, ionic shrinkage, and supercritical drying, and can their gas-filled final state guide a hollow-core mode with useful loss?
+- Can dopant-mediated two-photon chemistry form localized metallic reflective nodes with designed orientation, reflectance, and angular response?
 - Can a compiler map transformer state dictionaries into a realizable 3D topology and compensate for shrinkage?
 - Can terminal nodes produce directed scattering patterns that implement calibrated complex weights?
 - Can path integral summation of scattered fields produce a measurable inference result at the output?
+- Can a calibrated software/optical interface encode a prompt-derived numerical input into a coherent field and decode the measured output for a defined inference task?
 - Can phase relationships in the scattered fields be controlled with sufficient precision for useful computation?
 - Do RSA thresholding, excited-state lifetime, and Q/K XPM regions provide repeatable and sufficiently strong state-adaptive responses?
 - Which fabrication precision is required to maintain phase relationships across a multi-node path integral?
@@ -29,6 +31,7 @@ Can a monolithic 3D photonic volume implement a useful, measurable inference pri
 - Material and geometry requirements for RSA, lifetime, and Kerr/XPM behavior.
 - FDTD and reduced-order modeling of directed scattering and path integral accumulation.
 - Small demonstrators and measurement protocols.
+- Prompt preprocessing, optical input encoding, output detection, and digital decoding for a bounded task.
 - Yield, packaging, and cost sensitivity.
 
 ### Out of scope for the first phase
@@ -42,12 +45,13 @@ Can a monolithic 3D photonic volume implement a useful, measurable inference pri
 
 The project passes its first feasibility gate when it has:
 
-1. A measured or independently validated single-mode 3D routing path with fiber-like transparency.
+1. A measured 3D routing path whose propagation loss, confinement, and phase stability meet pre-registered criteria.
 2. A compiler prototype that maps a defined weight tensor into a 3D design and records shrinkage compensation.
 3. A calibrated terminal node with a repeatable directed scattering pattern and measured scattering efficiency.
 4. A measured path integral summation result that matches the numerical reference within a predefined tolerance.
 5. A validated nonlinear test fixture, even if the measured effect is insufficient for full inference.
 6. A reproducible model whose predictions agree with measured scattering behavior within a predefined tolerance.
+7. A bounded end-to-end task with a documented prompt-to-feature encoder, optical input mapping, detector/readout, digital decoder, and comparison against a numerical reference.
 
 ## 6. Evidence labels
 

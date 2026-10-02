@@ -10,13 +10,17 @@
 
 This report presents the first quantitative baseline physics analysis for the VOPU architecture, revised to reflect the correct computational model: VOPU computes through directed scattering and path integral summation, not through lossy photonic interconnects.
 
-**Key finding:** A 5-10 node linear demonstrator is feasible. Propagation loss through waveguide channels is negligible (fiber-like). The binding constraint on cascade depth is phase error from fabrication tolerance (±12 nm ImpCarv precision), not optical loss. Terminal nodes are computing elements — their directed scattering IS the weight multiplication. The only real losses are material absorption (small fraction) and coupling at input/output facets.
+**Key finding (conditional model):** The report's 5-10 node estimates assume a hypothetical guided channel and assumed propagation loss. They do not establish a fabricated VOPU guide, negligible propagation loss, or that phase error rather than loss is the binding constraint. Terminal nodes are intended to compute through directed scattering, but desired output and parasitic scattering/absorption still require measurement.
 
-**Go/No-Go recommendation:** Proceed to linear routing demonstrator (WP2). The linear network is feasible at 5-10 node depth.
+**Go/No-Go recommendation:** Proceed to a straight-guide feasibility experiment first. The simulated network is a conditional design study, not demonstrated device feasibility.
+
+## Evidence correction (2026-10-01)
+
+The earlier "fiber-optic principle" discussion conflated the existence of guided-wave physics with the loss of an unbuilt VOPU channel. The selected VOPU path is an ImpCarv lumen that is liquid-filled during washing and intended to become gas-filled after solvent exchange, ionic shrinkage, and supercritical-CO2 drying. Verify removal of liquid/residue and survival of the lumen. Water-jet guiding does not establish confinement in this reversed final index ordering, and none of the solid-core parameters or the 0.011 dB/cm estimate below characterize an ImpCarv hollow-core guide. Treat all loss and cascade-depth results as conditional model outputs only. E01 must measure final lumen/boundary geometry, hollow-mode profile, cutback loss, and phase stability before those outputs can inform a go/no-go decision.
 
 ---
 
-## 1. Mode Analysis [S]
+## 1. Mode Analysis [S] — Superseded for hollow-core channels
 
 ### Single-mode condition
 
@@ -25,35 +29,35 @@ This report presents the first quantitative baseline physics analysis for the VO
 | VOPU REV8 spec | 1.88 | 1.48 | 1.159 | 351 nm |
 | ImpCarv demonstrated | 1.5 | 1.0 | 1.118 | 364 nm |
 
-ImpCarv's demonstrated 67 nm features make single-mode waveguides achievable with margin.
+These maximum diameters are idealized solid-core step-index model values and do not apply to the selected hollow-core antiresonant channel. ImpCarv's reported vacancy feature size does not demonstrate that a hollow-core boundary or guided mode can be fabricated.
 
 ---
 
-## 2. Loss Budget — Corrected [S]
+## 2. Loss Budget — Corrected [S], not applicable to hollow-core ImpCarv channels
 
-### The fiber-optic principle
+### Reference values and unvalidated model assumptions
 
-VOPU waveguide channels are fiber-optic paths in a transparent medium. Propagation loss is negligible:
+The following values are comparison points or assumptions, not measured ImpCarv-guide performance:
 
 | Channel type | Loss | Source |
 |---|---|---|
 | Silica fiber (1550 nm) | 0.000002 dB/cm | [D] telecom standard |
 | PMMA plastic fiber (520 nm) | 0.001 dB/cm | [D] commercial POF |
-| ImpCarv hydrogel (532 nm, est.) | 0.011 dB/cm | [E] includes surface roughness |
-| REV8 spec placeholder | 0.25 dB/cm | [E] conservative placeholder, not physics |
+| Assumed VOPU propagation input (532 nm) | 0.011 dB/cm | [E] unvalidated model assumption; not an ImpCarv measurement |
+| REV8 spec placeholder | 0.25 dB/cm | [E] unvalidated model assumption |
 
-### Loss breakdown at 10 nodes (corrected model)
+### Illustrative loss breakdown at 10 nodes (conditional model)
 
 | Loss source | Loss | Share | Note |
 |---|---|---|---|
 | Coupling (in/out) | 0.5 dB | 35% | Getting light into the volume |
 | Node absorption | 0.88 dB | 62% | Only absorbed light — directed scattering is computation |
-| Propagation | 0.01 dB | 0.8% | Fiber. Negligible. |
+| Propagation | 0.01 dB | 0.8% | Follows from the assumed 0.011 dB/cm input; unmeasured. |
 | Bends | 0.03 dB | 2% | Small |
 | **Total** | **1.4 dB** | | SNR: 78.6 dB |
 | Directed scattering | **N/A** | | IS the computation |
 
-### Max cascade depth (loss-limited)
+### Max cascade depth (loss-limited; superseded for the selected channel)
 
 | Scenario | Max depth |
 |---|---|
@@ -61,7 +65,7 @@ VOPU waveguide channels are fiber-optic paths in a transparent medium. Propagati
 | Optimized nodes + mode-matched coupling | 1,929 nodes |
 | Original spec placeholder (0.25 dB/cm) | 561 nodes |
 
-**Loss is NOT the binding constraint.** Even with conservative estimates, loss allows 700+ nodes. The real constraint is phase precision.
+These cascade-depth results are conditional on assumed solid-core channel and node losses; they do not show that the selected hollow-core channel permits 700+ nodes. The binding constraint is not established until hollow-channel confinement, propagation, and node losses are measured.
 
 ---
 
@@ -111,7 +115,7 @@ Pure PMMA Kerr needs 13 W for 45° phase shift. Doped polymer (n2 ~ 10⁻¹⁶) 
 | 90% fidelity | 10 nodes |
 | 50% fidelity | 30 nodes |
 
-Binding constraint: **phase error**, not loss. A 5-10 node linear demonstrator is feasible.
+The report's assumed-input model identifies phase as its binding constraint, but this is conditional: measured channel loss and phase behavior could change the result.
 
 ---
 
@@ -123,11 +127,11 @@ A working compiler prototype maps weight matrices to 3D terminal-node topology w
 
 ## 7. Recommendations
 
-1. Fabricate and measure a single straight guide (E01) to confirm fiber-like transparency
+1. Fabricate and measure a straight hollow-core ImpCarv channel (E01), including post-shrink lumen/boundary geometry, hollow-mode confinement, cutback loss, and phase stability
 2. Calibrate one terminal node (E03) to establish directed scattering pattern and efficiency
 3. Measure actual ImpCarv dimensional tolerance for VOPU-specific geometries
 4. Implement per-node phase calibration to compensate fabrication errors
 5. Characterize PbPc-doped hydrogel RSA response at 532 nm in solid state
 6. Screen doped-polymer materials for electronic Kerr coefficient at 532 nm
 
-The critical path runs through fabrication precision and nonlinear material characterization. The linear network is feasible; the nonlinear mechanisms require independent material validation.
+The critical path begins with proving the guide geometry and measuring its loss; only then can cascade feasibility be assessed. Nonlinear mechanisms require independent material validation.
